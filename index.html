@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Gestor Inmobiliario</title>
+</head>
+<body>
+  <h1>Datos de inmuebles</h1>
+  <button onclick="cargar()">🔄 Refrescar</button>
+  <table id="tbl" border="1"></table>
+
+  <h2>Agregar registro</h2>
+  <form id="f">
+    <input placeholder="AÑO"   name="AÑO">
+    <input placeholder="MES"   name="MES">
+    <input placeholder="VALOR" name="VALOR_RECIBIDO">
+    <button>Guardar</button>
+  </form>
+
+<script>
+const URL = 'https://script.google.com/macros/s/xxxxxxxx/exec';
+
+async function cargar(){
+  const res = await fetch(URL);
+  const data = await res.json();
+  document.getElementById('tbl').innerHTML =
+    data.map(r => `<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+}
+
+document.getElementById('f').onsubmit = async e => {
+  e.preventDefault();
+  const form = Object.fromEntries(new FormData(e.target).entries());
+  const fila = Object.values(form);          // convierte en array
+  await fetch(URL, {
+    method:'POST',
+    body: JSON.stringify(fila),
+    headers:{'Content-Type':'application/json'}
+  });
+  cargar();              // refresca
+  e.target.reset();
+};
+
+cargar();
+</script>
+</body>
+</html>
