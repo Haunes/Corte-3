@@ -3,45 +3,75 @@
 <head>
   <meta charset="utf-8" />
   <title>Gestor Inmobiliario</title>
+  <style>
+    body{font-family:Arial;margin:20px;background:#fafafa}
+    table{border-collapse:collapse;width:100%}
+    th,td{border:1px solid #ccc;padding:4px 6px;font-size:0.9rem}
+    th{background:#005f94;color:#fff;position:sticky;top:0}
+    tr:nth-child(odd){background:#f2f7fb}
+    #loader{display:none}
+  </style>
 </head>
 <body>
-  <h1>Datos de inmuebles</h1>
-  <button onclick="cargar()">🔄 Refrescar</button>
-  <table id="tbl" border="1"></table>
 
-  <h2>Agregar registro</h2>
-  <form id="f">
-    <input placeholder="AÑO"   name="AÑO">
-    <input placeholder="MES"   name="MES">
-    <input placeholder="VALOR" name="VALOR_RECIBIDO">
-    <button>Guardar</button>
-  </form>
+<h1>Registros inmobiliarios</h1>
+<button onclick="cargar()">🔄 Refrescar</button>
+<span id="loader"> …cargando </span>
+
+<table id="tbl">
+  <thead>
+    <tr>
+      <th>AÑO</th><th>MES</th><th>INMUEBLE</th><th>PROPIETARIO</th>
+      <th>ARRENDATARIO</th><th>INCREMENTO</th><th>VALOR RECIBIDO</th>
+      <th>SEGURO 2.57</th><th>Calculo comisión</th><th>comisión</th>
+      <th>iva comisión</th><th>póliza arren</th><th>admon</th>
+      <th>V/r Transf ADMINISTRACIÓN</th><th>Arreglos/Rep.</th>
+      <th>V/r Transferencia</th><th>4×1000</th><th>VALOR A</th>
+      <th>FECHA GIRO</th><th>FACT. ELECTR.</th><th>FACT. MANDATO</th>
+      <th>COSTOS EXTRAS</th><th>POR MORA</th><th>ANOTACIÓN ARRENDATARIO</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<!--  Formulario opcional para añadir nuevas filas  -->
+<h2>Agregar fila</h2>
+<form id="form">
+  <input name="AÑO"  placeholder="AÑO"  style="width:60px">
+  <input name="MES"  placeholder="MES"  style="width:70px">
+  <input name="INMUEBLE" placeholder="INMUEBLE" style="width:120px">
+  <input name="VALOR RECIBIDO" placeholder="VALOR" style="width:100px">
+  <!--  añade los campos que quieras…  -->
+  <button>Guardar</button>
+</form>
 
 <script>
-const URL = 'https://script.google.com/macros/s/xxxxxxxx/exec';
+const URL = 'YOUR_SCRIPT_URL';   // ← pega aquí la URL del Web App
 
 async function cargar(){
-  const res = await fetch(URL);
-  const data = await res.json();
-  document.getElementById('tbl').innerHTML =
-    data.map(r => `<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+  document.getElementById('loader').style.display='inline';
+  const res  = await fetch(URL);
+  const data = await res.json();         // ← matriz 2‑D
+  const tbody = document.querySelector('#tbl tbody');
+  tbody.innerHTML = data.slice(1)        // omite encabezados de Sheets
+    .map(row => '<tr>'+row.map(c=>`<td>${c||''}</td>`).join('')+'</tr>')
+    .join('');
+  document.getElementById('loader').style.display='none';
 }
 
-document.getElementById('f').onsubmit = async e => {
+document.getElementById('form').onsubmit = async e=>{
   e.preventDefault();
-  const form = Object.fromEntries(new FormData(e.target).entries());
-  const fila = Object.values(form);          // convierte en array
+  const fila = Object.fromEntries(new FormData(e.target).entries());
   await fetch(URL, {
     method:'POST',
-    body: JSON.stringify(fila),
-    headers:{'Content-Type':'application/json'}
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(Object.values(fila))
   });
-  cargar();              // refresca
   e.target.reset();
+  cargar();           // refresca la tabla
 };
 
-cargar();
+cargar();             // carga al abrir
 </script>
 </body>
 </html>
-
