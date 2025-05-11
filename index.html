@@ -76,3 +76,21 @@ cargar();             // carga al abrir
 </script>
 </body>
 </html>
+
+async function cargar(){
+  document.getElementById('loader').style.display='inline';
+  try{
+    const res  = await fetch(URL);
+    if(!res.ok) throw new Error(res.statusText);
+    const data = await res.json();
+
+    document.querySelector('#tbl tbody').innerHTML =
+      data.slice(1)
+          .map(r => '<tr>'+r.map(c=>`<td>${c||''}</td>`).join('')+'</tr>')
+          .join('');
+  }catch(err){
+    console.error('Error al cargar:', err);
+  }finally{
+    document.getElementById('loader').style.display='none';
+  }
+}
